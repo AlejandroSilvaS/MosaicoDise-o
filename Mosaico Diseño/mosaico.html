@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mosaico interactivo tipo “plaque”</title>
+  <style>
+    :root{
+      --azul:#132243; --amarillo:#F6BB00; --blanco:#FFFFFF;
+      --tile-gap: 8px; --tile-radius: 10px; --tile-shadow: 0 2px 10px rgba(0,0,0,.2);
+      /* Colores de categorías (RGB) */
+      --cat-PAIM: 0,218,220; /* cian */
+      --cat-PM:   0,213,102; /* verde */
+      --cat-SI:   177,178,177; /* gris */
+      --cat-TD:   245,183,30;  /* amarillo */
+      --cat-otro: 255,255,255; /* blanco */
+    }
+    html,body{ height:100%; margin:0; background: var(--azul); color: var(--blanco); font: 16px/1.5 system-ui, Segoe UI, Roboto, Helvetica, Arial; }
+    body::before{ content:""; position:fixed; inset:0; z-index:-2; background: radial-gradient(circle at 20% 30%, rgba(255,255,255,.05) 0 35%, transparent 36%), radial-gradient(circle at 80% 70%, rgba(255,255,255,.05) 0 32%, transparent 33%), linear-gradient(135deg, #0e1a36 0%, #0b1530 40%, #0a122a 100%); }
+    body::after{ content:""; position:fixed; inset:0; z-index:-1; pointer-events:none; background: repeating-linear-gradient(135deg, rgba(255,255,255,.03) 0 2px, transparent 2px 6px), radial-gradient(closest-side, rgba(255,255,255,.06), transparent 70%) left 12% top 18%/280px 280px no-repeat, radial-gradient(closest-side, rgba(255,255,255,.06), transparent 70%) right 8% bottom 16%/220px 220px no-repeat; mix-blend-mode: overlay; }
+
+    .band-left, .band-right{ position:fixed; top:0; bottom:0; width:min(27vw, 360px); pointer-events:none; }
+    .band-left{ left:0; background: linear-gradient(120deg, var(--amarillo) 0 6%, transparent 6%); opacity:.85; }
+    .band-right{ right:0; background: linear-gradient(-120deg, var(--amarillo) 0 6%, transparent 6%); opacity:.85; }
+
+    .page{ min-height:100%; display:grid; grid-template-rows:auto auto 1fr auto; }
+    header{ padding: clamp(16px, 2.5vw, 28px) clamp(18px, 5vw, 56px); display:grid; grid-template-columns: auto 1fr; align-items:center; gap:18px; }
+    .brand{ display:flex; align-items:center; gap:14px; }
+    .brand img{ width:56px; height:56px; object-fit:contain; filter: drop-shadow(0 4px 10px rgba(0,0,0,.35)); }
+    .brand .name{ font-weight:800; letter-spacing:.3px; font-size: clamp(18px, 2.2vw, 26px); color: var(--amarillo); }
+    .title-box{ text-align:right; margin-left:auto; }
+    .title-box .line1{ font-size: clamp(14px,1.4vw,16px); opacity:.85 }
+    .title-box .line2{ font-weight: 900; font-size: clamp(22px,3.2vw,38px); color: var(--amarillo); letter-spacing:.6px }
+    .title-box .line3{ font-weight:600; font-size: clamp(14px,1.6vw,18px); opacity:.9 }
+
+    /* Controles */
+    .controls-wrap{ padding: 4px clamp(18px, 5vw, 56px) 0; }
+    .filters{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin: 0 0 8px; }
+    .filters .legend{ display:flex; gap:10px; align-items:center; font-size:14px; opacity:.9 }
+    .chip{ display:inline-flex; align-items:center; gap:8px; }
+    .dot{ width:12px; height:12px; border-radius:999px; display:inline-block; }
+
+    .btn{ border:1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.06); color: var(--blanco); font-weight:700; letter-spacing:.2px; padding:8px 12px; border-radius:10px; cursor:pointer; transition: transform .12s ease, background .12s ease, border-color .12s ease; box-shadow: 0 4px 10px rgba(0,0,0,.25); }
+    .btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.10); }
+    .btn.active{ border-color: var(--amarillo); box-shadow: 0 0 0 3px rgba(246,187,0,.22); }
+
+    .stage-wrap{ padding: 6px clamp(18px, 5vw, 56px) 28px; }
+    .stage{ border-radius: 20px; position: relative; overflow: hidden; border:1px solid rgba(255,255,255,.08); background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02)); box-shadow: inset 0 0 0 1px rgba(255,255,255,.04), 0 18px 38px rgba(0,0,0,.35); padding: clamp(14px,2.4vw,26px); display:grid; gap: clamp(16px,2.2vw,24px); grid-template-rows: auto 1fr; }
+
+    .section-title{ font-weight:800; letter-spacing:.4px; opacity:.95; margin:0 0 6px; display:flex; align-items:center; gap:10px; }
+    .section-title::before{ content:""; width:10px; height:10px; background: var(--amarillo); border-radius:2px; box-shadow: 0 0 0 4px rgba(246,187,0,.18); }
+
+    .grid{ display:grid; gap: var(--tile-gap); }
+    #gridStudents{ grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+
+    .tile{ position:relative; border-radius: var(--tile-radius); overflow:hidden; box-shadow: var(--tile-shadow); background:#0b1327; border:1px solid rgba(255,255,255,.06); aspect-ratio: 3 / 4; cursor:pointer; --tint-rgb: var(--cat-otro); }
+    .tile img, .tile video{ position:absolute; inset:0; width:100%; height:100%; object-fit: cover; display:block; }
+    .tile img{ z-index: 1; }
+    .tile video{ z-index: 3; opacity:0; transition: opacity .18s ease; }
+    .tile.playing video{ opacity:1; }
+
+    /* Overlay de color SIEMPRE visible (20%) sobre imagen (z=2), debajo del video (z=3) */
+    .tile::after{ content:""; position:absolute; inset:0; pointer-events:none; z-index:2; background: rgba(var(--tint-rgb), .2); /* 20% fijo */ transition: background .12s ease; }
+    /* Cuando el video está reproduciéndose, se apaga el overlay */
+    .tile.playing::after{ background: rgba(var(--tint-rgb), 0); }
+
+    .tile .caption{ position:absolute; left:0; right:0; bottom:0; padding:6px 8px; background: linear-gradient(180deg, transparent, rgba(19,34,67,.88)); font-size:14px; font-weight:700; letter-spacing:.2px; color: var(--blanco); text-align:center; text-shadow: 0 2px 8px rgba(0,0,0,.65); z-index:4; /* por encima del video */ }
+
+    .hidden{ display:none !important; }
+  </style>
+</head>
+<body>
+  <div class="band-left"></div>
+  <div class="band-right"></div>
+
+  <div class="page">
+    <header>
+      <div class="brand">
+        <img src="IMAGES/LOGO_UMNG.png" alt="Escudo / Logo" />
+        <div class="name">Universidad Militar Nueva Granada</div>
+      </div>
+      <div class="title-box">
+        <div class="line1">Promoción</div>
+        <div class="line2">2025-II</div>
+        <div class="line3">DISEÑO III</div>
+      </div>
+    </header>
+
+    <!-- Controles -->
+    <div class="controls-wrap">
+      <div class="filters" role="toolbar" aria-label="Filtros de categoría">
+        <button class="btn active" data-filter="todos">Todos</button>
+        <button class="btn" data-filter="PAIM">PAIM</button>
+        <button class="btn" data-filter="PM">PM</button>
+        <button class="btn" data-filter="SI">SI</button>
+        <button class="btn" data-filter="TD">TD</button>
+
+        <div class="legend" aria-hidden="true" style="margin-left:auto">
+          <span class="chip"><span class="dot" style="background:rgb(var(--cat-PAIM))"></span>procesamiento y analisis de la informacion multimedia</span>
+          <span class="chip"><span class="dot" style="background:rgb(var(--cat-PM))"></span>Produccion Multimedia</span>
+          <span class="chip"><span class="dot" style="background:rgb(var(--cat-SI))"></span>Sistemas interactivos</span>
+          <span class="chip"><span class="dot" style="background:rgb(var(--cat-TD))"></span>Trasformacion Digital</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stage-wrap">
+      <section class="stage">
+        <h3 class="section-title">Estudiantes</h3>
+        <div id="gridStudents" class="grid" aria-live="polite"></div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    /* Reglas de categorías por prefijo (comparar en minúsculas sobre el basename) */
+    const CATEGORY_RULES = [
+      { key: 'PAIM', prefix: 'paim_', rgbVar: '--cat-PAIM' },
+      { key: 'PM',   prefix: 'pm_',   rgbVar: '--cat-PM'   },
+      { key: 'SI',   prefix: 'si_',   rgbVar: '--cat-SI'   },
+      { key: 'TD',   prefix: 'td_',   rgbVar: '--cat-TD'   }
+    ];
+
+    
+    const STUDENTS = [
+      { img: 'IMAGES/PM_luisa.jpeg',   video: 'VIDEOS/luisa.mp4',  name: 'LUISA SANCHEZ',       href: 'Luisa.html' },
+      { img: 'IMAGES/TD_catalina.jpg', video: 'VIDEOS/Cata.mp4',   name: 'CATALINA RODRIGUEZ',  href: 'Catalina.html' },
+      { img: 'IMAGES/PM_SOFIA.png',    video: 'VIDEOS/Sofia.mp4',  name: 'SOFIA ALVAREZ',       href: 'Sofia.html' },
+      { img: 'IMAGES/SI_Mp.jpg',       video: 'VIDEOS/Mapis.mp4',  name: 'MARIA PAULA',         href: 'MariaPaula.html' },
+      { img:  'IMAGES/PAIM_AS.png',   video: 'VIDEOS/Alejandro.mp4', name: 'ALEJANDRO SILVA',   href: 'Alejandro.html' },
+      {img:'IMAGES/TD_Karen.jpeg',   video:'VIDEOS/karen.mp4',     name:'KAREN DIAZ',      href:'Karen.html' },
+  
+    ];
+
+    const gridStudents = document.getElementById('gridStudents');
+    const filterBtns = document.querySelectorAll('.filters .btn');
+
+    function categorizeByPrefix(filePath){
+      if (!filePath) return 'otro';
+      const lower = String(filePath).toLowerCase();
+      const lastSlash = Math.max(lower.lastIndexOf('/'), lower.lastIndexOf('\\'));
+      const basename = lastSlash >= 0 ? lower.slice(lastSlash + 1) : lower;
+      for (const r of CATEGORY_RULES){
+        if (basename.startsWith(r.prefix)) return r.key;
+      }
+      return 'otro';
+    }
+
+    function tintRGBFor(catKey){
+      const root = getComputedStyle(document.documentElement);
+      switch(catKey){
+        case 'PAIM': return root.getPropertyValue('--cat-PAIM') || '0,218,220';
+        case 'PM':   return root.getPropertyValue('--cat-PM')   || '0,213,102';
+        case 'SI':   return root.getPropertyValue('--cat-SI')   || '177,178,177';
+        case 'TD':   return root.getPropertyValue('--cat-TD')   || '245,183,30';
+        default:     return root.getPropertyValue('--cat-otro') || '255,255,255';
+      }
+    }
+
+    function makeTile(item){
+      const category = categorizeByPrefix(item.img);
+      const tint = tintRGBFor(category);
+
+      const link = document.createElement('a');
+      link.href = item.href || 'persona.html'; // ⬅️ Enlace por estudiante
+      link.style.display = 'block';
+      link.style.textDecoration = 'none';
+      link.setAttribute('aria-label', item.name || 'Detalle');
+
+      const d = document.createElement('div');
+      d.className = 'tile';
+      d.dataset.category = category;
+      d.style.setProperty('--tint-rgb', (tint||'').trim());
+
+      const img = document.createElement('img');
+      img.loading='lazy';
+      img.src=item.img;
+      img.alt=item.name||'';
+      d.appendChild(img);
+
+      if (item.video){
+        const vid = document.createElement('video');
+        vid.muted=true; vid.loop=true; vid.playsInline=true; vid.preload='none';
+        vid.src=item.video; d.appendChild(vid);
+
+        // Hover/focus: reproducir inmediatamente (overlay se apaga por CSS con .playing)
+        const start = () => { d.classList.add('playing'); vid.play().catch(()=>{}); };
+        const stop  = () => { vid.pause(); vid.currentTime=0; d.classList.remove('playing'); };
+        d.addEventListener('mouseenter', start);
+        d.addEventListener('mouseleave', stop);
+        link.addEventListener('focusin', start);
+        link.addEventListener('focusout', stop);
+      }
+
+      const cap = document.createElement('div');
+      cap.className = 'caption';
+      cap.textContent = item.name||'';
+      d.appendChild(cap);
+
+      link.appendChild(d);
+      return link;
+    }
+
+    function renderAll(){
+      const frag = document.createDocumentFragment();
+      STUDENTS.forEach(stu => frag.appendChild(makeTile(stu)));
+      gridStudents.appendChild(frag);
+    }
+
+    function applyFilter(filterKey){
+      const anchors = gridStudents.querySelectorAll('a');
+      anchors.forEach(a => {
+        const tile = a.querySelector('.tile');
+        if (!tile) return;
+        if (filterKey==='todos' || tile.dataset.category === filterKey){
+          a.classList.remove('hidden');
+        } else {
+          a.classList.add('hidden');
+        }
+      });
+    }
+
+    function setupFilters(){
+      filterBtns.forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          filterBtns.forEach(b=>b.classList.remove('active'));
+          btn.classList.add('active');
+          applyFilter(btn.dataset.filter);
+        });
+      });
+    }
+
+    renderAll();
+    setupFilters();
+    applyFilter('todos');
+  </script>
+</body>
+</html>
