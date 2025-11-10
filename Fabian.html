@@ -77,12 +77,12 @@
       padding: clamp(18px,2vw,26px);
     }
 
-    /* Titular */
+    /* Titular (achicado) */
     .card h2{
       margin:0 0 16px;
       font-weight: 900;
-      font-size: clamp(32px, 5vw, 72px);
-      line-height: 1.1;
+      font-size: clamp(24px, 3.2vw, 65px);
+      line-height: 1.15;
       letter-spacing: .2px;
       color: var(--amarillo);
       text-wrap: balance;
@@ -90,14 +90,18 @@
     .headline-white{ color: var(--blanco) !important; }
 
     .longtext{
-      font-size: clamp(18px,1.6vw,20px);
+      font-size: clamp(16px,1.4vw,18px);
       line-height: 1.7;
       min-height:40vh;
     }
 
     .photo{
-      aspect-ratio:1/1; background: var(--amarillo);
-      border-radius:8px; position:relative; overflow:hidden; cursor: pointer;
+      aspect-ratio:1/1;
+      background: var(--amarillo);
+      border-radius:8px;
+      position:relative;
+      overflow:hidden;
+      cursor: pointer;
     }
     .photo img, .photo video{
       position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block;
@@ -105,16 +109,19 @@
     .photo video{
       opacity:0; transition: opacity .18s ease;
     }
-    /* Mostrar video solo cuando está reproduciendo */
     .photo.playing video{ opacity:1; }
 
-    .actions{ display:flex; gap:14px; margin-top:20px; flex-wrap: wrap; }
+    .actions{
+      display:flex; gap:14px; margin-top:20px; flex-wrap: wrap;
+    }
     .btn{
       background: var(--amarillo); color:#111; font-weight:800;
       padding:14px 22px; font-size:18px; border:0; border-radius:10px;
       cursor:pointer; text-decoration:none; display:inline-block;
     }
-    .btn.secondary{ background: transparent; color:#fff; border:2px solid rgba(255,255,255,.3); }
+    .btn.secondary{
+      background: transparent; color:#fff; border:2px solid rgba(255,255,255,.3);
+    }
 
     /* Responsive: 1 columna en pantallas chicas */
     @media (max-width: 900px){
@@ -139,19 +146,16 @@
       <div id="ribbonName" class="ribbon">Nombre</div>
       <div class="grid">
         <article class="card longtext">
-          <h2 class="headline-white"> Ingeniera en multimedia con enfoque en producción audiovisual
-para cine, televisión y eventos corporativos.</h2>
+          <h2 class="headline-white">Ingeniero en multimedia, animador 3D semi senior con enfasis en iluminacion telas y ropa.</h2>
           <p id="bio">Aquí puedes escribir la reseña del estudiante, logros, roles, enlaces, etc.</p>
         </article>
         <aside class="card">
           <div class="photo" id="photoBox" aria-label="Reproducir/Pausar video">
             <img id="photo" src="" alt="Foto del estudiante">
-            <!-- nota: sin loop, lo controlamos por JS -->
             <video id="video" muted playsinline preload="none"></video>
           </div>
           <div class="actions">
             <a class="btn" href="index.html">← Volver</a>
-            <!-- reemplazo del botón de descarga -->
             <button class="btn secondary" id="replayBtn" type="button">Reproducir video</button>
           </div>
         </aside>
@@ -160,12 +164,11 @@ para cine, televisión y eventos corporativos.</h2>
   </div>
 
   <script>
-    // Datos del estudiante (del código antiguo)
+    // Datos del estudiante (ajusta libremente)
     const STUDENT_DETAIL = {
-      name: "Karen Diaz",
-      img: "IMAGES/PM_Karen.jpeg",
-      video: "VIDEOS/karen.mp4",
-      // bio: "Ingeniera en multimedia enfocada en producción multimedia y desarrollo de tecnologías interactivas..."
+      name: "Fabian Gonzales",
+      img: "IMAGES/PM_Fabian.jpeg",
+      video: "VIDEOS/Fabian.mp4"
     };
 
     // Elementos
@@ -183,7 +186,7 @@ para cine, televisión y eventos corporativos.</h2>
     imgEl.alt          = `Foto de ${STUDENT_DETAIL.name || "estudiante"}`;
     if (STUDENT_DETAIL.video){ vidEl.src = STUDENT_DETAIL.video; }
 
-    // Helpers de reproducción
+    // Helpers
     function playFromStart(){
       if(!vidEl.src) return;
       photoBox.classList.add('playing');
@@ -204,10 +207,10 @@ para cine, televisión y eventos corporativos.</h2>
       }
     }
 
-    // Botón "Reproducir video"
+    // Reproducir desde botón
     replayBtn.addEventListener('click', playFromStart);
 
-    // Click/tap sobre la foto: play/pausa
+    // Click/tap en la imagen: toggle
     photoBox.addEventListener('click', togglePlay);
 
     // Al terminar, vuelve a la imagen

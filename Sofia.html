@@ -87,10 +87,7 @@
       color: var(--amarillo);
       text-wrap: balance;
     }
-    /* Solo este titular en blanco */
-    .headline-white{
-      color: var(--blanco) !important;
-    }
+    .headline-white{ color: var(--blanco) !important; }
 
     .longtext{
       font-size: clamp(18px,1.6vw,20px);
@@ -98,10 +95,19 @@
       min-height:40vh;
     }
 
-    .photo{ aspect-ratio:1/1; background: var(--amarillo); border-radius:8px; position:relative; overflow:hidden; }
-    .photo img, .photo video{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; }
-    .photo video{ opacity:0; transition: opacity .18s ease; }
-    .photo:hover video{ opacity:1; }
+    /* ---------- Foto/Video ---------- */
+    .photo{
+      aspect-ratio:1/1; background: var(--amarillo);
+      border-radius:8px; position:relative; overflow:hidden; cursor: pointer;
+    }
+    .photo img, .photo video{
+      position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block;
+    }
+    .photo video{
+      opacity:0; transition: opacity .18s ease;
+    }
+    /* Mostrar video solo mientras se reproduce */
+    .photo.playing video{ opacity:1; }
 
     .actions{ display:flex; gap:14px; margin-top:20px; flex-wrap: wrap; }
     .btn{ background: var(--amarillo); color:#111; font-weight:800; padding:14px 22px; font-size:18px; border:0; border-radius:10px; cursor:pointer; text-decoration:none; display:inline-block; }
@@ -134,13 +140,15 @@
           <p id="bio">Aquí puedes escribir la reseña del estudiante, logros, roles, enlaces, etc.</p>
         </article>
         <aside class="card">
-          <div class="photo">
+          <div class="photo" id="photoBox" aria-label="Reproducir/Pausar video">
             <img id="photo" src="" alt="Foto del estudiante">
-            <video id="video" muted loop playsinline preload="none"></video>
+            <!-- sin loop; controlado por JS -->
+            <video id="video" muted playsinline preload="none"></video>
           </div>
           <div class="actions">
             <a class="btn" href="index.html">← Volver</a>
-            <a class="btn secondary" id="downloadBtn" href="#" download>Descargar foto</a>
+            <!-- antes: descargar foto -->
+            <button class="btn secondary" id="replayBtn" type="button">Reproducir video</button>
           </div>
         </aside>
       </div>
@@ -148,30 +156,53 @@
   </div>
 
   <script>
-    // Datos del estudiante (ajusta libremente)
+    // Datos del estudiante
     const STUDENT_DETAIL = {
       name: "Sofia Alvarez",
-     img: "IMAGES/PM_SOFIA.png",
+      img: "IMAGES/PM_SOFIA.png",
       video: "VIDEOS/Sofia.mp4",
-      // bio opcional
-      // bio: "Ingeniera en multimedia enfocada en producción multimedia y desarrollo de tecnologías interactivas..."
+      // bio: "...",
     };
 
-    // Pinta los datos en la página
-    document.getElementById("ribbonName").textContent = STUDENT_DETAIL.name || "Nombre";
-    document.getElementById("bio").textContent = STUDENT_DETAIL.bio || "";
+    // Elementos
+    const ribbon    = document.getElementById("ribbonName");
+    const bioEl     = document.getElementById("bio");
+    const imgEl     = document.getElementById("photo");
+    const vidEl     = document.getElementById("video");
+    const photoBox  = document.getElementById("photoBox");
+    const replayBtn = document.getElementById("replayBtn");
 
-    const imgEl = document.getElementById("photo");
-    const vidEl = document.getElementById("video");
-    const dlBtn = document.getElementById("downloadBtn");
+    // Pinta datos
+    ribbon.textContent = STUDENT_DETAIL.name || "Nombre";
+    bioEl.textContent  = STUDENT_DETAIL.bio || "";
+    imgEl.src          = STUDENT_DETAIL.img;
+    imgEl.alt          = `Foto de ${STUDENT_DETAIL.name || "estudiante"}`;
+    if (STUDENT_DETAIL.video){ vidEl.src = STUDENT_DETAIL.video; }
 
-    imgEl.src = STUDENT_DETAIL.img;
-    imgEl.alt = `Foto de ${STUDENT_DETAIL.name || "estudiante"}`;
-    dlBtn.href = STUDENT_DETAIL.img;
-
-    if (STUDENT_DETAIL.video){
-      vidEl.src = STUDENT_DETAIL.video;
+    // Reproducción
+    function playFromStart(){
+      if(!vidEl.src) return;
+      photoBox.classList.add('playing');
+      vidEl.currentTime = 0;
+      vidEl.play().catch(()=>{});
     }
+    function pauseAndReset(){
+      vidEl.pause();
+      vidEl.currentTime = 0;
+      photoBox.classList.remove('playing');
+    }
+    function togglePlay(){
+      if(vidEl.paused){
+        photoBox.classList.add('playing');
+        vidEl.play().catch(()=>{});
+      }else{
+        pauseAndReset();
+      }
+    }
+
+    replayBtn.addEventListener('click', playFromStart);
+    photoBox.addEventListener('click', togglePlay);
+    vidEl.addEventListener('ended', pauseAndReset);
   </script>
 </body>
 </html>
