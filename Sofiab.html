@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Detalle — Estudiante</title>
+  <style>
+    :root{
+      --azul:#132243; --amarillo:#F6BB00; --blanco:#FFFFFF;
+    }
+    html,body{
+      height:100%; margin:0;
+      background: var(--azul);
+      color: var(--blanco);
+      font: 18px/1.6 system-ui, Segoe UI, Roboto, Helvetica, Arial;
+    }
+
+    body::before{ content:""; position:fixed; inset:0; z-index:-2; background:
+      radial-gradient(circle at 20% 30%, rgba(255,255,255,.05) 0 35%, transparent 36%),
+      radial-gradient(circle at 80% 70%, rgba(255,255,255,.05) 0 32%, transparent 33%),
+      linear-gradient(135deg, #0e1a36 0%, #0b1530 40%, #0a122a 100%); }
+    body::after{ content:""; position:fixed; inset:0; z-index:-1; pointer-events:none; background:
+      repeating-linear-gradient(135deg, rgba(255,255,255,.03) 0 2px, transparent 2px 6px),
+      radial-gradient(closest-side, rgba(255,255,255,.06), transparent 70%) left 12% top 18%/280px 280px no-repeat,
+      radial-gradient(closest-side, rgba(255,255,255,.06), transparent 70%) right 8% bottom 16%/220px 220px no-repeat;
+      mix-blend-mode: overlay; }
+
+    .band-left, .band-right{ position:fixed; top:0; bottom:0; width:min(27vw, 360px); pointer-events:none; }
+    .band-left{ left:0; background: linear-gradient(120deg, var(--amarillo) 0 6%, transparent 6%); opacity:.85; }
+    .band-right{ right:0; background: linear-gradient(-120deg, var(--amarillo) 0 6%, transparent 6%); opacity:.85; }
+
+    header{
+      padding: clamp(16px, 2.5vw, 28px) clamp(18px, 5vw, 56px);
+      display:flex; align-items:center; gap:14px;
+    }
+    .brand img{ width:64px; height:64px; object-fit:contain; filter: drop-shadow(0 4px 10px rgba(0,0,0,.35)); }
+    .brand .name{ font-weight:800; letter-spacing:.3px; font-size: clamp(22px, 2.6vw, 32px); color: var(--amarillo); margin-left:auto }
+
+    .stage-wrap{ padding: 6px clamp(18px, 5vw, 56px) 28px; }
+    .stage{
+      border-radius:26px;
+      background: rgba(5,16,40,.92);
+      box-shadow: 0 20px 45px rgba(0,0,0,.55);
+      padding: clamp(22px,2.6vw,32px);
+    }
+
+    /* Cinta del nombre */
+    .ribbon{
+      position:relative;
+      display:inline-block;
+      background: var(--amarillo);
+      color:#111;
+      font-weight:900;
+      font-size: clamp(24px,3.4vw,40px);
+      padding:14px 46px;
+      margin:16px 0 26px;
+    }
+    .ribbon::before, .ribbon::after{
+      content:""; position:absolute; top:0; bottom:0; width:12vw;
+      background: var(--amarillo); transform: skewX(18deg);
+    }
+    .ribbon::before{ left:-10vw; }
+    .ribbon::after{ right:-10vw; }
+
+    .stage-inner{
+      max-width: 1100px;   /* ancho cómodo del contenido */
+      margin: 0 auto;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      text-align:center;
+      gap: 22px;
+    }
+
+    .card-label{
+      margin: 0;
+      font-size: 0.9rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      opacity: .7;
+    }
+
+    /* Foto / video arriba */
+    .photo-wrapper{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:10px;
+    }
+
+    .photo{
+      aspect-ratio:3/4;
+      background: #ffffff;
+      border-radius:18px;
+      position:relative;
+      overflow:hidden;
+      cursor: pointer;
+      width: 460px;        /* 👈 ancho fijo en desktop */
+      max-width: none;     /* ignora límites por porcentaje */
+      box-shadow: 0 14px 30px rgba(0,0,0,.55);
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .photo:hover{
+      transform: translateY(-4px);
+      box-shadow: 0 18px 38px rgba(0,0,0,.65);
+    }
+
+    .photo img, .photo video{
+      position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block;
+    }
+    .photo video{
+      opacity:0; transition: opacity .18s ease;
+    }
+    .photo.playing video{ opacity:1; }
+
+    /* Bloque de texto abajo */
+    .text-block{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap: 10px;
+    }
+
+    .text-block h2{
+      margin:0;
+      font-weight:900;
+      font-size: clamp(22px, 2.8vw, 34px);
+      line-height:1.2;
+      letter-spacing:.2px;
+      color: var(--blanco);
+      text-wrap: balance;
+    }
+
+    .text-block p{
+      max-width: 36rem;
+      margin: 0;
+      font-size: clamp(16px,1.4vw,18px);
+      line-height: 1.7;
+      opacity:.96;
+    }
+
+    .actions{
+      display:flex; gap:14px; margin-top:18px; flex-wrap: wrap;
+      justify-content:center;
+    }
+    .btn{
+      background: var(--amarillo); color:#111; font-weight:800;
+      padding:12px 22px; font-size:16px; border:0; border-radius:10px;
+      cursor:pointer; text-decoration:none; display:inline-block;
+      box-shadow: 0 4px 12px rgba(0,0,0,.4);
+    }
+    .btn.secondary{
+      background: transparent; color:#fff; border:2px solid rgba(255,255,255,.4);
+      box-shadow:none;
+    }
+    .btn:hover{
+      filter:brightness(1.03);
+      transform: translateY(-1px);
+    }
+
+    /* En móvil sí la hacemos adaptable */
+    @media (max-width: 600px){
+      .photo{
+        width: 80vw;      /* ocupa el 80% del ancho de pantalla */
+      }
+      .ribbon{
+        padding:10px 26px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="band-left"></div>
+  <div class="band-right"></div>
+
+  <header>
+    <div class="brand">
+      <img src="IMAGES/LOGO_UMNG.png" alt="Logo" />
+      <div class="name">Universidad Militar Nueva Granada</div>
+    </div>
+  </header>
+
+  <div class="stage-wrap">
+    <section class="stage">
+      <div id="ribbonName" class="ribbon">Nombre</div>
+
+      <div class="stage-inner">
+        <!-- FOTO ARRIBA -->
+        <div class="photo-wrapper">
+          <p class="card-label">Retrato</p>
+          <div class="photo" id="photoBox" aria-label="Reproducir/Pausar video">
+            <img id="photo" src="" alt="Foto del estudiante">
+            <video id="video" muted playsinline preload="none"></video>
+          </div>
+        </div>
+
+        <!-- TEXTO ABAJO -->
+        <div class="text-block">
+          <p class="card-label">Perfil profesional</p>
+          <h2>Me visualizo liderando proyectos de innovación digital que integren datos, multimedia y experiencia de usuario para generar nuevos modelos de negocio</h2>
+          <p id="bio">
+          </p>
+        </div>
+
+        <!-- BOTONES -->
+        <div class="actions">
+          <a class="btn" href="index.html">← Volver</a>
+          <button class="btn secondary" id="replayBtn" type="button">Reproducir video</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // Datos del estudiante (ajusta libremente)
+    const STUDENT_DETAIL = {
+      name: "Sofia Borja",
+      img: "IMAGES/TD_SofiaB.jpg",
+      video: "VIDEOS/SofiaB.mp4"
+      
+    };
+
+    const ribbon    = document.getElementById("ribbonName");
+    const bioEl     = document.getElementById("bio");
+    const imgEl     = document.getElementById("photo");
+    const vidEl     = document.getElementById("video");
+    const photoBox  = document.getElementById("photoBox");
+    const replayBtn = document.getElementById("replayBtn");
+
+    // Pinta datos
+    ribbon.textContent = STUDENT_DETAIL.name || "Nombre";
+    bioEl.textContent  = STUDENT_DETAIL.bio || "";
+    imgEl.src          = STUDENT_DETAIL.img;
+    imgEl.alt          = `Foto de ${STUDENT_DETAIL.name || "estudiante"}`;
+    if (STUDENT_DETAIL.video){ vidEl.src = STUDENT_DETAIL.video; }
+
+    function playFromStart(){
+      if(!vidEl.src) return;
+      photoBox.classList.add('playing');
+      vidEl.currentTime = 0;
+      vidEl.play().catch(()=>{});
+    }
+    function pauseAndReset(){
+      vidEl.pause();
+      vidEl.currentTime = 0;
+      photoBox.classList.remove('playing');
+    }
+    function togglePlay(){
+      if(vidEl.paused){
+        photoBox.classList.add('playing');
+        vidEl.play().catch(()=>{});
+      }else{
+        pauseAndReset();
+      }
+    }
+
+    replayBtn.addEventListener('click', playFromStart);
+    photoBox.addEventListener('click', togglePlay);
+    vidEl.addEventListener('ended', pauseAndReset);
+  </script>
+</body>
+</html>
