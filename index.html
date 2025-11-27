@@ -3,27 +3,25 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Mosaico
-  </title>
+  <title>Mosaico</title>
   <style>
     :root{
       --azul:#132243; --amarillo:#F6BB00; --blanco:#FFFFFF;
 
       /* Grilla / tarjetas */
-      --tile-gap: 12px;       /* separaciones (puedes bajar a 2px si quieres) */
+      --tile-gap: 12px;
       --tile-radius: 10px;
       --tile-shadow: 0 2px 10px rgba(0,0,0,.2);
-      --tile-size: 120px;     /* ancho base por tarjeta */
+      --tile-size: 120px;
 
       /* Colores de categorías (RGB) */
-      --cat-PAIM: 0,218,220;  /* cian */
-      --cat-PM:   0,213,102;  /* verde */
-      --cat-SI:   177,178,177;/* gris */
-      --cat-TD:   245,183,30; /* amarillo */
-      --cat-otro: 255,255,255;/* blanco */
+      --cat-PAIM: 0,218,220;
+      --cat-PM:   0,213,102;
+      --cat-SI:   177,178,177;
+      --cat-TD:   245,183,30;
+      --cat-otro: 255,255,255;
     }
 
-    /* Tamaños fijos por breakpoint: evita que cambien al filtrar */
     @media (min-width: 576px){ :root{ --tile-size: 140px; } }
     @media (min-width: 992px){ :root{ --tile-size: 180px; } }
 
@@ -82,10 +80,69 @@
 
     /* Controles */
     .controls-wrap{ padding: 4px clamp(18px, 5vw, 56px) 0; }
-    .filters{ display:flex; flex-wrap:wrap; gap: clamp(6px, 1vw, 10px); align-items:center; margin: 0 0 8px; }
-    .filters .legend{ display:flex; gap: clamp(6px, 1vw, 10px); row-gap: 6px; align-items:center; font-size:14px; opacity:.9; margin-left:auto; flex-wrap:wrap; }
-    .chip{ display:inline-flex; align-items:center; gap:8px; }
-    .dot{ width:12px; height:12px; border-radius:999px; display:inline-block; }
+
+    /* NUEVA BANDA AMARILLA */
+    .program-banner{
+      display:flex;
+      justify-content:center;
+      margin: 0 0 10px;
+    }
+    .program-label{
+      background: var(--amarillo);
+      color:#111;
+      font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      padding:10px 40px;
+      border-radius:999px;
+      box-shadow:0 6px 18px rgba(0,0,0,.5);
+      font-size:clamp(14px,1.6vw,18px);
+      text-align:center;
+    }
+
+    .filters{
+      display:flex; flex-wrap:wrap;
+      gap: clamp(6px, 1vw, 10px);
+      align-items:center; margin: 0 0 8px;
+    }
+
+    .filters .legend{
+      display:flex;
+      gap: 8px;
+      row-gap: 6px;
+      align-items:center;
+      font-size:1rem;
+      opacity:.95;
+      margin-left:auto;
+      flex-wrap:wrap;
+    }
+
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:4px 10px;
+      border-radius:999px;
+      background: rgba(255,255,255,.08);
+      cursor:pointer;
+      border:1px solid rgba(255,255,255,.16);
+      transition: background .15s ease, transform .15s ease, box-shadow .15s ease;
+      font-size:0.9rem;
+    }
+
+    .chip:hover{
+      background: rgba(255,255,255,.16);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(0,0,0,.35);
+    }
+
+    .dot{
+      width:12px;
+      height:12px;
+      border-radius:999px;
+      display:inline-block;
+    }
+
     @media (max-width: 768px){ .filters .legend{ margin-left: 0; } }
 
     .btn{
@@ -119,11 +176,11 @@
       border-radius:2px; box-shadow: 0 0 0 4px rgba(246,187,0,.18);
     }
 
-    /* ====== GRILLA ====== (columnas fijas; no cambian al filtrar) */
+    /* GRILLA */
     .grid{
       display:grid;
       gap: var(--tile-gap);
-      justify-content: center; /* centra el conjunto de columnas */
+      justify-content: center;
     }
     #gridStudents{
       grid-template-columns: repeat(auto-fill, minmax(var(--tile-size), var(--tile-size)));
@@ -134,14 +191,13 @@
       box-shadow: var(--tile-shadow); background:#0b1327; border:1px solid rgba(255,255,255,.06);
       aspect-ratio: 3 / 4; cursor:pointer; --tint-rgb: var(--cat-otro);
       content-visibility: auto; contain-intrinsic-size: 300px 400px;
-      width: var(--tile-size); /* tamaño fijo */
+      width: var(--tile-size);
     }
     .tile img, .tile video{ position:absolute; inset:0; width:100%; height:100%; object-fit: cover; display:block; }
     .tile img{ z-index: 1; image-rendering: auto; }
     .tile video{ z-index: 3; opacity:0; transition: opacity .18s ease; }
     .tile.playing video{ opacity:1; }
 
-    /* Overlay de color SIEMPRE visible (20%) sobre imagen (z=2), debajo del video (z=3) */
     .tile::after{
       content:""; position:absolute; inset:0; pointer-events:none; z-index:2;
       background: rgba(var(--tint-rgb), .2);
@@ -149,7 +205,6 @@
     }
     .tile.playing::after{ background: rgba(var(--tint-rgb), 0); }
 
-    /* ====== CAPTION MEJORADO (legible con muchos/ nombres largos) ====== */
     .tile .caption{
       position:absolute; left:0; right:0; bottom:0;
       padding:8px 10px;
@@ -164,10 +219,10 @@
       text-shadow: 0 2px 8px rgba(0,0,0,.75);
       z-index:4;
       line-height: 1.15;
-      min-height: 2.4em; /* reserva dos líneas */
+      min-height: 2.4em;
       display: -webkit-box;
       -webkit-box-orient: vertical;
-      -webkit-line-clamp: 2; /* máx. 2 líneas */
+      -webkit-line-clamp: 2;
       overflow: hidden;
       font-size: clamp(12px, 1.2vw, 14px);
     }
@@ -176,12 +231,66 @@
       .tile .caption{ white-space: normal; }
     }
 
-    /* Muy angosto/landscape móvil: tiles más bajos */
     @media (max-height: 540px) and (orientation: landscape){
       .tile{ aspect-ratio: 1 / 1; }
     }
 
     .hidden{ display:none !important; }
+
+    /* ========= MODAL ========= */
+    .modal{
+      position:fixed;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background: rgba(0,0,0,.45);
+      opacity:0;
+      pointer-events:none;
+      transition: opacity .2s ease;
+      z-index: 999;
+    }
+    .modal.show{
+      opacity:1;
+      pointer-events:auto;
+    }
+    .modal-dialog{
+      background:#ffffff;
+      color:#000000;
+      border-radius:12px;
+      padding:20px 26px 18px;
+      max-width:480px;
+      width: calc(100% - 40px);
+      box-shadow:0 10px 30px rgba(0,0,0,.35);
+      text-align:center;
+      border-top:6px solid transparent;
+    }
+    .modal-title{
+      margin:0 0 10px;
+      font-size:1.3rem;
+      font-weight:700;
+      color:#000000;
+    }
+    .modal-body{
+      margin:0 0 18px;
+      font-size:.95rem;
+      line-height:1.5;
+      color:#000000;
+    }
+    .modal-close-btn{
+      border:none;
+      padding:8px 20px;
+      border-radius:999px;
+      background:#ffffff;
+      color:#000000;
+      cursor:pointer;
+      font-weight:600;
+      font-size:.9rem;
+      box-shadow:0 3px 8px rgba(0,0,0,.25);
+    }
+    .modal-close-btn:hover{
+      filter:brightness(0.9);
+    }
   </style>
 </head>
 <body>
@@ -203,6 +312,12 @@
 
     <!-- Controles -->
     <div class="controls-wrap">
+
+      <!-- BANDA AMARILLA: INGENIERÍA EN MULTIMEDIA -->
+      <div class="program-banner">
+        <div class="program-label">INGENIERÍA EN MULTIMEDIA</div>
+      </div>
+
       <div class="filters" role="toolbar" aria-label="Filtros de categoría">
         <button class="btn active" data-filter="todos">Todos</button>
         <button class="btn" data-filter="PAIM">PAIM</button>
@@ -210,11 +325,24 @@
         <button class="btn" data-filter="SI">SI</button>
         <button class="btn" data-filter="TD">TD</button>
 
-        <div class="legend" aria-hidden="true" style="margin-left:auto">
-          <span class="chip"><span class="dot" style="background:rgb(var(--cat-PAIM))"></span>Procesamiento y análisis de la información multimedia</span>
-          <span class="chip"><span class="dot" style="background:rgb(var(--cat-PM))"></span>Producción Multimedia</span>
-          <span class="chip"><span class="dot" style="background:rgb(var(--cat-SI))"></span>Sistemas Interactivos</span>
-          <span class="chip"><span class="dot" style="background:rgb(var(--cat-TD))"></span>Transformación Digital</span>
+        <!-- LEYENDA CLICABLE -->
+        <div class="legend">
+          <span class="chip" onclick="openLegendModal('PAIM')">
+            <span class="dot" style="background:rgb(var(--cat-PAIM))"></span>
+            Procesamiento y análisis de la información multimedia (PAIM)
+          </span>
+          <span class="chip" onclick="openLegendModal('PM')">
+            <span class="dot" style="background:rgb(var(--cat-PM))"></span>
+            Producción Multimedia (PM)
+          </span>
+          <span class="chip" onclick="openLegendModal('SI')">
+            <span class="dot" style="background:rgb(var(--cat-SI))"></span>
+            Sistemas Interactivos (SI)
+          </span>
+          <span class="chip" onclick="openLegendModal('TD')">
+            <span class="dot" style="background:rgb(var(--cat-TD))"></span>
+            Transformación Digital (TD)
+          </span>
         </div>
       </div>
     </div>
@@ -227,8 +355,16 @@
     </div>
   </div>
 
+  <!-- MODAL -->
+  <div id="legendModal" class="modal" aria-hidden="true">
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="legendModalTitle">
+      <h2 id="legendModalTitle" class="modal-title">Título</h2>
+      <p id="legendModalBody" class="modal-body">Contenido</p>
+      <button type="button" class="modal-close-btn" onclick="closeLegendModal()">Cerrar</button>
+    </div>
+  </div>
+
   <script>
-    /* Reglas de categorías por prefijo (comparar en minúsculas sobre el basename) */
     const CATEGORY_RULES = [
       { key: 'PAIM', prefix: 'paim_', rgbVar: '--cat-PAIM' },
       { key: 'PM',   prefix: 'pm_',   rgbVar: '--cat-PM'   },
@@ -236,16 +372,27 @@
       { key: 'TD',   prefix: 'td_',   rgbVar: '--cat-TD'   }
     ];
 
-    /* Datos de ejemplo */
     const STUDENTS = [
-      { img: 'IMAGES/PM_luisa.jpeg',   video: 'VIDEOS/luisa.mp4',   name: 'LUISA SÁNCHEZ',      href: 'Luisa.html' },
-      { img: 'IMAGES/TD_catalina.jpg', video: 'VIDEOS/Cata.mp4',    name: 'CATALINA RODRÍGUEZ', href: 'Catalina.html' },
-      { img: 'IMAGES/PM_SOFIA.png',    video: 'VIDEOS/Sofia.mp4',   name: 'SOFIA ÁLVAREZ',      href: 'Sofia.html' },
-      { img: 'IMAGES/SI_Mp.jpg',       video: 'VIDEOS/Mapis.mp4',   name: 'MARÍA PAULA DIAZ',        href: 'MariaPaula.html' },
-      { img: 'IMAGES/PAIM_AS.png',     video: 'VIDEOS/Alejandro.mp4', name:'ALEJANDRO SILVA',   href: 'Alejandro.html' },
-      { img: 'IMAGES/PM_Karen.jpeg',   video: 'VIDEOS/karen.mp4',   name: 'KAREN DÍAZ',         href: 'Karen.html' },
-      { img: 'IMAGES/PM_Fabian.jpeg',     video: 'VIDEOS/Juan.mp4',    name: 'FABIAN GONZALES',         href: 'Fabian.html' },
-
+      { img: 'IMAGES/PM_luisa.jpeg',   video: 'VIDEOS/luisa2.mp4',   name: 'LUISA SÁNCHEZ',      href: 'Luisa.html' },
+      { img: 'IMAGES/TD_catalina.jpg', video: 'VIDEOS/Cata2.mp4',    name: 'CATALINA RODRÍGUEZ', href: 'Catalina.html' },
+      { img: 'IMAGES/PM_SOFIA.png',    video: 'VIDEOS/Sofia2.mp4',   name: 'SOFIA ÁLVAREZ',      href: 'Sofia.html' },
+      { img: 'IMAGES/SI_Mp.jpg',       video: 'VIDEOS/Mapis2.mp4',   name: 'MARÍA PAULA DIAZ',   href: 'MariaPaula.html' },
+      { img: 'IMAGES/PAIM_AS.png',     video: 'VIDEOS/Alejandro2.mp4', name:'ALEJANDRO SILVA',   href: 'Alejandro.html' },
+      { img: 'IMAGES/PM_Karen.jpeg',   video: 'VIDEOS/karen2.mp4',   name: 'KAREN DÍAZ',         href: 'Karen.html' },
+      { img: 'IMAGES/PM_Fabian.jpeg',  video: 'VIDEOS/Fabian2.mp4',    name: 'FABIAN GONZALES',    href: 'Fabian.html' },
+      { img: 'IMAGES/SI_Ana.jpg',       video: 'VIDEOS/Ana.mp4',        name: 'ANA MARÍA MARTÍNEZ',     href: 'Ana.html' },
+      { img: 'IMAGES/PM_Diana.jpg',     video: 'VIDEOS/Diana.mp4',      name: 'DIANA XIMENA ÁNGEL',     href: 'Diana.html' },
+      { img: 'IMAGES/TD_Jimmy.jpg',     video: 'VIDEOS/Jimmy.mp4',      name: 'JIMMY MARTÍNEZ',         href: 'Jimmy.html' },
+      { img: 'IMAGES/SI_LauraC.png',    video: 'VIDEOS/LauraC.mp4',     name: 'LAURA CAROLINA BELTRAN', href: 'LauraC.html' },
+      { img: 'IMAGES/PAIM_Nicolas.jpg', video: 'VIDEOS/Nicolas.mp4',    name: 'NICOLAS RODRIGUEZ',      href: 'Nicolas.html' },
+      { img: 'IMAGES/TD_RONAL.jpg',     video: 'VIDEOS/Ronal.mp4',      name: 'RONAL SUESCA',           href: 'Ronal.html' },
+      { img: 'IMAGES/PAIM_Andres.jpg',   video: 'VIDEOS/Andres.mp4',   name: 'ANDRÉS BRICEÑO',   href: 'Andres.html' },
+  { img: 'IMAGES/PAIM_Juanita.jpg',  video: 'VIDEOS/Juanita.mp4',  name: 'JUANITA PALACIOS',  href: 'Juanita.html' },
+  { img: 'IMAGES/PM_David.png',      video: 'VIDEOS/David.mp4',    name: 'DAVID MENDIETA',    href: 'David.html' },
+  { img: 'IMAGES/PM_Laura.jpg',      video: 'VIDEOS/Laura.mp4',    name: 'LAURA ROBAYO',    href: 'Laura.html' },
+  { img: 'IMAGES/SI_Camilo.jpg',     video: 'VIDEOS/Camilo.mp4',   name: 'CAMILO TRUJILLO',   href: 'Camilo.html' },
+  { img: 'IMAGES/TD_Cristian.jpg',   video: 'VIDEOS/Cristian.mp4', name: 'CRISTIAN PEÑA', href: 'Cristian.html' },
+  { img: 'IMAGES/TD_Sofia.jpg',      video: 'VIDEOS/Sofia.mp4',    name: 'SOFÍA BORJA',    href: 'Sofiab.html' }
     ];
 
     const gridStudents = document.getElementById('gridStudents');
@@ -278,11 +425,11 @@
       const tint = tintRGBFor(category);
 
       const link = document.createElement('a');
-      link.href = item.href || 'persona.html'; // enlace por estudiante
+      link.href = item.href || 'persona.html';
       link.style.display = 'block';
       link.style.textDecoration = 'none';
       link.setAttribute('aria-label', item.name || 'Detalle');
-      link.title = item.name || ''; // tooltip con nombre completo en desktop
+      link.title = item.name || '';
 
       const d = document.createElement('div');
       d.className = 'tile';
@@ -301,7 +448,6 @@
         vid.muted=true; vid.loop=true; vid.playsInline=true; vid.preload='none';
         vid.src=item.video; d.appendChild(vid);
 
-        // Interacción hover (PC) + focus (teclado)
         const start = () => { d.classList.add('playing'); vid.play().catch(()=>{}); };
         const stop  = () => { vid.pause(); vid.currentTime=0; d.classList.remove('playing'); };
 
@@ -329,7 +475,6 @@
       gridStudents.appendChild(frag);
     }
 
-    // Filtrado: NO cambia tamaños; sólo oculta/visibiliza
     function applyFilter(filterKey){
       const anchors = gridStudents.querySelectorAll('a');
       anchors.forEach(a => {
@@ -354,12 +499,10 @@
       });
     }
 
-    /* ---------- Render inicial ---------- */
     renderAll();
     setupFilters();
     applyFilter('todos');
 
-    /* ---------- “Hover” en móvil mediante tap ---------- */
     (function setupTouchPlayback(){
       const canHover = window.matchMedia('(hover: hover)').matches;
       if(!canHover){
@@ -369,35 +512,26 @@
           if(!tile || !anchor) return;
           const vid = tile.querySelector('video');
 
-          if(!vid){
-            // Si no hay video, deja navegar normal
-            return;
-          }
+          if(!vid){ return; }
 
-          // En móvil: primer tap reproduce/pausa; segundo tap abre el detalle
           e.preventDefault();
 
           if(!tile.classList.contains('playing')){
             tile.classList.add('playing');
             vid.play().catch(()=>{});
-            // Arma para que el próximo tap en el mismo enlace navegue
             anchor.dataset.armed = '1';
-            // Desarma automáticamente después de 1.5s si no tocan de nuevo
             clearTimeout(anchor._armT);
             anchor._armT = setTimeout(()=>{
               anchor.dataset.armed = '';
             }, 1500);
           }else{
             if(anchor.dataset.armed === '1'){
-              // segundo tap dentro de la ventana: navega
-              // limpia estado y permite navegar
               tile.classList.remove('playing');
               vid.pause(); vid.currentTime=0;
               anchor.dataset.armed = '';
               clearTimeout(anchor._armT);
               window.location.href = anchor.href;
             }else{
-              // si no estaba armado (p.ej., pasó el tiempo), sólo pausa
               tile.classList.remove('playing');
               vid.pause(); vid.currentTime=0;
             }
@@ -406,7 +540,6 @@
       }
     })();
 
-    /* ---------- Respeta preferencias del usuario: reduce movimiento ---------- */
     (function respectReducedMotion(){
       const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if(prefersReduced){
@@ -416,6 +549,70 @@
         });
       }
     })();
+
+    /* ===== MODAL LEYENDA ===== */
+
+    const LEGEND_COLORS = {
+      PAIM: "0,218,220",
+      PM:   "0,213,102",
+      SI:   "177,178,177",
+      TD:   "245,183,30"
+    };
+
+    const legendModal   = document.getElementById("legendModal");
+    const legendTitle   = document.getElementById("legendModalTitle");
+    const legendBody    = document.getElementById("legendModalBody");
+    const legendDialog  = legendModal.querySelector(".modal-dialog");
+
+    function openLegendModal(code){
+      let title = "";
+      let text  = "";
+
+      if (code === "PAIM"){
+        title = "Procesamiento y análisis de la información multimedia (PAIM)";
+        text  = "Esta área del programa desarrolla los fundamentos necesarios para que los graduados en Ingeniería en Multimedia puedan desempeñarse en actividades relacionadas con el análisis y el procesamiento de la información en diferentes sectores de aplicación. Así mismo, profundiza mediante componentes electivos, en áreas como la visión por computador, el procesamiento del lenguaje natural, sistemas de recomendación y aprendizaje semántico, entre otras. Desarrolla las líneas del procesamiento digital de señales multimedia y de inteligencia artificial, las cuales, al ser combinadas, ofrecen un potencial importante para el soporte a aplicaciones de diferentes sectores y de otras áreas de profundización.";
+      } else if (code === "PM"){
+        title = "Producción Multimedia (PM)";
+        text  = "El área de Producción Multimedia tiene como objetivo el fundamentar a los estudiantes en los conceptos y técnicas computacionales para la producción de diversos contenidos, los cuales son diseñados, producidos e implementados en diversos productos multimedia y de base tecnológica. ";
+      } else if (code === "SI"){
+        title = "Sistemas Interactivos (SI)";
+        text  = "El área aborda aspectos relacionados con el diseño, evaluación y desarrollo de sistemas interactivos, los cuales deben estar orientados a las necesidades de los usuarios y adaptadas a su contexto. De esa forma se abordan conceptos teóricos y prácticos del  área de la interacción humano computador, que permiten al profesional proponer soluciones creativas enfocadas a cumplir con las expectativas en un marco de viabilidad y factibilidad. ";
+      } else if (code === "TD"){
+        title = "Transformación Digital (TD)";
+        text  = "El área de Transformación Digital está enfocada en el aprendizaje de conceptos fundamentales para diseñar, estructurar y desarrollar productos y soluciones a las organizaciones de acuerdo con las tendencias de emprendimiento e innovación, aplicando tecnologías digitales. ";
+      }
+      if (!title) return;
+      legendTitle.textContent = title;
+      legendBody.textContent  = text;
+      const rgb = LEGEND_COLORS[code];
+      if (rgb){
+        legendDialog.style.background = "rgb(" + rgb + ")";
+        legendDialog.style.borderTop  = "6px solid rgb(" + rgb + ")";
+      } else {
+        legendDialog.style.background = "#ffffff";
+        legendDialog.style.borderTop  = "6px solid transparent";
+      }
+
+      legendModal.classList.add("show");
+      legendModal.setAttribute("aria-hidden","false");
+    }
+
+    function closeLegendModal(){
+      legendModal.classList.remove("show");
+      legendModal.setAttribute("aria-hidden","true");
+    }
+
+    legendModal.addEventListener("click", (e)=>{
+      if (e.target === legendModal){
+        closeLegendModal();
+      }
+    });
+
+    document.addEventListener("keydown", (e)=>{
+      if (e.key === "Escape" && legendModal.classList.contains("show")){
+        closeLegendModal();
+      }
+    });
   </script>
 </body>
 </html>

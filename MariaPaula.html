@@ -38,11 +38,10 @@
 
     .stage-wrap{ padding: 6px clamp(18px, 5vw, 56px) 28px; }
     .stage{
-      border-radius:20px;
-      border:1px solid rgba(255,255,255,.08);
-      background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.04),0 18px 38px rgba(0,0,0,.35);
-      padding: clamp(20px,2.6vw,32px);
+      border-radius:26px;
+      background: rgba(5,16,40,.92);
+      box-shadow: 0 20px 45px rgba(0,0,0,.55);
+      padding: clamp(22px,2.6vw,32px);
     }
 
     /* Cinta del nombre */
@@ -52,9 +51,9 @@
       background: var(--amarillo);
       color:#111;
       font-weight:900;
-      font-size: clamp(28px,4vw,48px);
-      padding:20px 60px;
-      margin:24px 0 36px;
+      font-size: clamp(24px,3.4vw,40px);
+      padding:14px 46px;
+      margin:16px 0 26px;
     }
     .ribbon::before, .ribbon::after{
       content:""; position:absolute; top:0; bottom:0; width:12vw;
@@ -63,59 +62,110 @@
     .ribbon::before{ left:-10vw; }
     .ribbon::after{ right:-10vw; }
 
-    .grid{
-      display:grid; gap:40px;
-      grid-template-columns: 1.3fr .7fr;
-      align-items:start;
+    .stage-inner{
+      max-width: 1100px;   /* ancho cómodo del contenido */
+      margin: 0 auto;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      text-align:center;
+      gap: 22px;
     }
 
-    /* Tarjetas */
-    .card{
-      background: rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.1);
-      border-radius:14px;
-      padding: clamp(18px,2vw,26px);
+    .card-label{
+      margin: 0;
+      font-size: 0.9rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      opacity: .7;
     }
 
-    /* ===== TITULAR GRANDE ===== */
-    .card h2{
-      margin:0 0 16px;
-      font-weight: 900;
-      font-size: clamp(32px, 5vw, 72px);
-      line-height: 1.1;
-      letter-spacing: .2px;
-      color: var(--amarillo);
-      text-wrap: balance;
-    }
-    .headline-white{ color: var(--blanco) !important; }
-
-    .longtext{
-      font-size: clamp(18px,1.6vw,20px);
-      line-height: 1.7;
-      min-height:40vh;
+    /* Foto / video arriba */
+    .photo-wrapper{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:10px;
     }
 
     .photo{
-      aspect-ratio:1/1; background: var(--amarillo);
-      border-radius:8px; position:relative; overflow:hidden; cursor: pointer;
+      aspect-ratio:3/4;
+      background: #ffffff;
+      border-radius:18px;
+      position:relative;
+      overflow:hidden;
+      cursor: pointer;
+      width: 460px;        /* 👈 ancho fijo en desktop */
+      max-width: none;     /* ignora límites por porcentaje */
+      box-shadow: 0 14px 30px rgba(0,0,0,.55);
+      transition: transform .18s ease, box-shadow .18s ease;
     }
+    .photo:hover{
+      transform: translateY(-4px);
+      box-shadow: 0 18px 38px rgba(0,0,0,.65);
+    }
+
     .photo img, .photo video{
       position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block;
     }
     .photo video{
       opacity:0; transition: opacity .18s ease;
     }
-    /* Mostrar video solo cuando está reproduciendo */
     .photo.playing video{ opacity:1; }
 
-    .actions{ display:flex; gap:14px; margin-top:20px; flex-wrap: wrap; }
-    .btn{ background: var(--amarillo); color:#111; font-weight:800; padding:14px 22px; font-size:18px; border:0; border-radius:10px; cursor:pointer; text-decoration:none; display:inline-block; }
-    .btn.secondary{ background: transparent; color:#fff; border:2px solid rgba(255,255,255,.3); }
+    /* Bloque de texto abajo */
+    .text-block{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap: 10px;
+    }
 
-    /* Responsive: 1 columna en pantallas chicas */
-    @media (max-width: 900px){
-      .grid{ grid-template-columns: 1fr; }
-      .photo{ max-width: 420px; margin-inline: auto; }
+    .text-block h2{
+      margin:0;
+      font-weight:900;
+      font-size: clamp(22px, 2.8vw, 34px);
+      line-height:1.2;
+      letter-spacing:.2px;
+      color: var(--blanco);
+      text-wrap: balance;
+    }
+
+    .text-block p{
+      max-width: 36rem;
+      margin: 0;
+      font-size: clamp(16px,1.4vw,18px);
+      line-height: 1.7;
+      opacity:.96;
+    }
+
+    .actions{
+      display:flex; gap:14px; margin-top:18px; flex-wrap: wrap;
+      justify-content:center;
+    }
+    .btn{
+      background: var(--amarillo); color:#111; font-weight:800;
+      padding:12px 22px; font-size:16px; border:0; border-radius:10px;
+      cursor:pointer; text-decoration:none; display:inline-block;
+      box-shadow: 0 4px 12px rgba(0,0,0,.4);
+    }
+    .btn.secondary{
+      background: transparent; color:#fff; border:2px solid rgba(255,255,255,.4);
+      box-shadow:none;
+    }
+    .btn:hover{
+      filter:brightness(1.03);
+      transform: translateY(-1px);
+    }
+
+    /* En móvil sí la hacemos adaptable */
+    @media (max-width: 600px){
+      .photo{
+        width: 80vw;      /* ocupa el 80% del ancho de pantalla */
+      }
+      .ribbon{
+        padding:10px 26px;
+      }
     }
   </style>
 </head>
@@ -133,37 +183,43 @@
   <div class="stage-wrap">
     <section class="stage">
       <div id="ribbonName" class="ribbon">Nombre</div>
-      <div class="grid">
-        <article class="card longtext">
-          <h2 class="headline-white">Ingeniera en multimedia enfocada en marketing digital</h2>
-          <p id="bio">Aquí puedes escribir la reseña del estudiante, logros, roles, enlaces, etc.</p>
-        </article>
-        <aside class="card">
+
+      <div class="stage-inner">
+        <!-- FOTO ARRIBA -->
+        <div class="photo-wrapper">
+          <p class="card-label">Retrato</p>
           <div class="photo" id="photoBox" aria-label="Reproducir/Pausar video">
             <img id="photo" src="" alt="Foto del estudiante">
-            <!-- sin loop; lo controlamos por JS -->
             <video id="video" muted playsinline preload="none"></video>
           </div>
-          <div class="actions">
-            <a class="btn" href="index.html">← Volver</a>
-            <!-- antes: descargar foto; ahora: reproducir -->
-            <button class="btn secondary" id="replayBtn" type="button">Reproducir video</button>
-          </div>
-        </aside>
+        </div>
+
+        <!-- TEXTO ABAJO -->
+        <div class="text-block">
+          <p class="card-label">Perfil profesional</p>
+          <h2>Ingeniera en multimedia enfocada en marketing digital.</h2>
+          <p id="bio">
+          </p>
+        </div>
+
+        <!-- BOTONES -->
+        <div class="actions">
+          <a class="btn" href="index.html">← Volver</a>
+          <button class="btn secondary" id="replayBtn" type="button">Reproducir video</button>
+        </div>
       </div>
     </section>
   </div>
 
   <script>
-    // Datos del estudiante (tu info original)
+    // Datos del estudiante (ajusta libremente)
     const STUDENT_DETAIL = {
       name: "Maria Paula Diaz",
       img: "IMAGES/SI_Mp.jpg",
-      video: "VIDEOS/Mapis.mp4",
-      // bio: "Ingeniera en multimedia enfocada en producción multimedia y desarrollo de tecnologías interactivas..."
+      video: "VIDEOS/Mapis2.mp4",
+
     };
 
-    // Elementos
     const ribbon    = document.getElementById("ribbonName");
     const bioEl     = document.getElementById("bio");
     const imgEl     = document.getElementById("photo");
@@ -178,7 +234,6 @@
     imgEl.alt          = `Foto de ${STUDENT_DETAIL.name || "estudiante"}`;
     if (STUDENT_DETAIL.video){ vidEl.src = STUDENT_DETAIL.video; }
 
-    // Helpers de reproducción
     function playFromStart(){
       if(!vidEl.src) return;
       photoBox.classList.add('playing');
@@ -199,13 +254,8 @@
       }
     }
 
-    // Botón "Reproducir video"
     replayBtn.addEventListener('click', playFromStart);
-
-    // Click/tap sobre la foto para play/pausa
     photoBox.addEventListener('click', togglePlay);
-
-    // Al terminar, vuelve a la imagen
     vidEl.addEventListener('ended', pauseAndReset);
   </script>
 </body>
